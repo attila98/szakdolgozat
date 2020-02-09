@@ -1,11 +1,5 @@
 package szakdoga.View;
 
-import szakdoga.entity.Doctor;
-import szakdoga.entity.Patient;
-import szakdoga.entity.Timetable;
-import szakdoga.service.DoctorService;
-import szakdoga.service.PatientService;
-import szakdoga.service.TimetableService;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -20,6 +14,12 @@ import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
+import szakdoga.entity.Doctor;
+import szakdoga.entity.Patient;
+import szakdoga.entity.Timetable;
+import szakdoga.service.DoctorService;
+import szakdoga.service.PatientService;
+import szakdoga.service.TimetableService;
 
 import javax.annotation.PostConstruct;
 import java.util.Date;
@@ -47,6 +47,7 @@ public class Registration extends VerticalLayout {
     TextField emailD =new TextField();
     TextField passwordD =new TextField();
     TextField cityD =new TextField();
+
     Button okD=new Button();
     Button backD=new Button();
 
@@ -99,6 +100,15 @@ public class Registration extends VerticalLayout {
         add(verticalLayout);
         beteg.addClickListener(c->patientReg());
         orvos.addClickListener(c->doctorReg());
+
+        fieldsValidationSetUp();
+
+        if (email.isInvalid()){
+            System.out.println("kaki email");
+        }
+        if (firstName.isInvalid()){
+            System.out.println("kaki nev!");
+        }
     }
 
     public void patientReg(){
@@ -126,16 +136,20 @@ public class Registration extends VerticalLayout {
         back.setText("Vissza");
         back.addClickListener(buttonClickEvent -> UI.getCurrent().navigate(Login.class));
         patientFormLayout.add(firstName,lastName,email,password,tb_number,ok,back);
-
-        ok.addClickListener(buttonClickEvent ->    {patient.setFirst_name(firstName.getValue());
-            patient.setLast_name(lastName.getValue());
-            patient.setBirth_day(szul);
-            patient.setEmail(email.getValue());
-            patient.setPassword(password.getValue());
-            patient.setTb_number(tb_number.getValue());
-            patientService.save(patient);
-            Notification.show("Sikeres regisztráció!",2000,Notification.Position.MIDDLE);
-            UI.getCurrent().navigate(Login.class);
+        ok.addClickListener(buttonClickEvent ->    {
+            if(patientIsValid()){
+                patient.setFirst_name(firstName.getValue());
+                patient.setLast_name(lastName.getValue());
+                patient.setBirth_day(szul);
+                patient.setEmail(email.getValue());
+                patient.setPassword(password.getValue());
+                patient.setTb_number(tb_number.getValue());
+                patientService.save(patient);
+                Notification.show("Sikeres regisztráció!",2000,Notification.Position.MIDDLE);
+                UI.getCurrent().navigate(Login.class);
+            }else {
+                Notification.show("Hibás adat!",1000,Notification.Position.MIDDLE);
+            }
         });
 
     }
@@ -168,14 +182,19 @@ public class Registration extends VerticalLayout {
         doctorFormLayout.add(firstNameD,lastNameD,emailD,passwordD,cityD,okD,backD);
 
         okD.addClickListener(buttonClickEvent ->    {
-            doctor.setFirst_name(firstNameD.getValue());
-            doctor.setLast_name(lastNameD.getValue());
-            doctor.setEmail(emailD.getValue());
-            doctor.setPassword(passwordD.getValue());
-            doctor.setCity(cityD.getValue());
-            doctorService.save(doctor);
-            doctorFormLayout.setVisible(false);
-            doctorFormLayout2.setVisible(true);
+            if (doctorIsValid()){
+                doctor.setFirst_name(firstNameD.getValue());
+                doctor.setLast_name(lastNameD.getValue());
+                doctor.setEmail(emailD.getValue());
+                doctor.setPassword(passwordD.getValue());
+                doctor.setCity(cityD.getValue());
+                doctorService.save(doctor);
+                doctorFormLayout.setVisible(false);
+                doctorFormLayout2.setVisible(true);
+            }else {
+                Notification.show("Hibás adatok!",2000,Notification.Position.MIDDLE);
+            }
+
         });
 
         H3 title =new H3("Adja meg a rendelési idejét!");
@@ -209,6 +228,66 @@ public class Registration extends VerticalLayout {
         doctorFormLayout2.add(title,mondayFrom,mondayTo,tuesdayFrom,tuesdayTo,wednesdayFrom,wednesdayTo,thursdayFrom
                 ,thursdayTo,fridayFrom,fridayTo,reg);
 
+    }
+
+    void fieldsValidationSetUp(){
+        firstName.setMinLength(2);
+        firstName.setMaxLength(20);
+        firstName.setPattern("^[a-zA-Z_]*$");
+        firstName.setErrorMessage("Hibás formátum!");
+
+        lastName.setMinLength(2);
+        lastName.setMaxLength(20);
+        lastName.setPattern("^[a-zA-Z_]*$");
+        lastName.setErrorMessage("Hibás formátum!");
+
+        password.setMinLength(6);
+        password.setMaxLength(20);
+        password.setErrorMessage("Minimum 6 karakter!");
+
+        tb_number.setMinLength(9);
+        tb_number.setMaxLength(9);
+        tb_number.setPattern("^[0-9_]*$");
+        tb_number.setErrorMessage("Pontosan 9 számjegy!");
+
+        email.setPattern("^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:.[a-zA-Z0-9-]+)*$");
+        email.setErrorMessage("Hibás email formátum!");
+
+        firstNameD.setMinLength(2);
+        firstNameD.setMaxLength(20);
+        firstNameD.setPattern("^[a-zA-Z_]*$");
+        firstNameD.setErrorMessage("Hibás formátum!");
+
+        lastNameD.setMinLength(2);
+        lastNameD.setMaxLength(20);
+        lastNameD.setPattern("^[a-zA-Z_]*$");
+        lastNameD.setErrorMessage("Hibás formátum!");
+
+        passwordD.setMinLength(6);
+        passwordD.setMaxLength(20);
+        passwordD.setErrorMessage("Minimum 6 karakter!");
+
+        emailD.setPattern("^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:.[a-zA-Z0-9-]+)*$");
+        emailD.setErrorMessage("Hibás email formátum!");
+
+        cityD.setMinLength(3);
+        cityD.setMaxLength(20);
+        cityD.setPattern("^[a-zA-Z_]*$");
+        cityD.setErrorMessage("Hibás formátum!");
+    }
+
+    boolean patientIsValid(){
+        if(firstName.isInvalid() || lastName.isInvalid() || email.isInvalid() || tb_number.isInvalid()
+                || firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || tb_number.isEmpty()){
+            return false;
+        }else return true;
+    }
+
+    boolean doctorIsValid(){
+        if(firstNameD.isInvalid() || lastNameD.isInvalid() || emailD.isInvalid() || cityD.isInvalid()
+                || firstNameD.isEmpty() || lastNameD.isEmpty() || emailD.isEmpty() || cityD.isEmpty()){
+            return false;
+        }else return true;
     }
 
     void setStyle(){

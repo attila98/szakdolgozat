@@ -63,10 +63,11 @@ public class Login extends VerticalLayout {
 
         verticalLayout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
         PatientLoginForm.addLoginListener(loginEvent -> {
+            patient=patientService.findByEmail(loginEvent.getUsername());
             if ((patientService.findByEmail(loginEvent.getUsername()) != null) && patient.getPassword().equals(loginEvent.getPassword())){
-                Notification.show("Sikeres bejelentkezés!",2000,Notification.Position.MIDDLE);
-                wrappedSession.setAttribute(Names.USERNAME,patient.getEmail());
-                UI.getCurrent().navigate(HomeView.class);
+                    Notification.show("Sikeres bejelentkezés!",2000,Notification.Position.MIDDLE);
+                    wrappedSession.setAttribute(Names.USERNAME,patient.getEmail());
+                    UI.getCurrent().navigate(HomeView.class);
             }else {
                 Notification.show("Hibas felhsznalonev vagy jelszo!");
                 PatientLoginForm.setEnabled(true);
