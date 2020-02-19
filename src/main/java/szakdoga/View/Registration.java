@@ -14,6 +14,7 @@ import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import szakdoga.entity.Doctor;
 import szakdoga.entity.Patient;
 import szakdoga.entity.Timetable;
@@ -77,6 +78,8 @@ public class Registration extends VerticalLayout {
     @Autowired
     TimetableService timetableService;
 
+    BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     public Registration(){
     }
 
@@ -102,13 +105,6 @@ public class Registration extends VerticalLayout {
         orvos.addClickListener(c->doctorReg());
 
         fieldsValidationSetUp();
-
-        if (email.isInvalid()){
-            System.out.println("kaki email");
-        }
-        if (firstName.isInvalid()){
-            System.out.println("kaki nev!");
-        }
     }
 
     public void patientReg(){
@@ -142,7 +138,7 @@ public class Registration extends VerticalLayout {
                 patient.setLast_name(lastName.getValue());
                 patient.setBirth_day(szul);
                 patient.setEmail(email.getValue());
-                patient.setPassword(password.getValue());
+                patient.setPassword(passwordEncoder.encode(password.getValue()));
                 patient.setTb_number(tb_number.getValue());
                 patientService.save(patient);
                 Notification.show("Sikeres regisztráció!",2000,Notification.Position.MIDDLE);

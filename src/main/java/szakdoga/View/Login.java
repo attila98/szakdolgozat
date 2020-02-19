@@ -1,5 +1,6 @@
 package szakdoga.View;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import szakdoga.Names;
 import szakdoga.entity.Doctor;
 import szakdoga.entity.Patient;
@@ -38,6 +39,7 @@ public class Login extends VerticalLayout {
     Patient patient=new Patient();
     Doctor doctor=new Doctor();
 
+    BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public Login() {}
 
@@ -64,7 +66,7 @@ public class Login extends VerticalLayout {
         verticalLayout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
         PatientLoginForm.addLoginListener(loginEvent -> {
             patient=patientService.findByEmail(loginEvent.getUsername());
-            if ((patientService.findByEmail(loginEvent.getUsername()) != null) && patient.getPassword().equals(loginEvent.getPassword())){
+            if ((patientService.findByEmail(loginEvent.getUsername()) != null) && passwordEncoder.matches(loginEvent.getPassword(),patient.getPassword())){
                     Notification.show("Sikeres bejelentkezés!",2000,Notification.Position.MIDDLE);
                     wrappedSession.setAttribute(Names.USERNAME,patient.getEmail());
                     UI.getCurrent().navigate(HomeView.class);

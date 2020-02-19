@@ -4,7 +4,10 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.notification.Notification;
@@ -19,12 +22,14 @@ import szakdoga.Names;
 import szakdoga.entity.Doctor;
 import szakdoga.entity.Patient;
 import szakdoga.entity.Timetable;
+import szakdoga.service.AppointmentService;
 import szakdoga.service.DoctorService;
 import szakdoga.service.PatientService;
 import szakdoga.service.TimetableService;
 
 import javax.annotation.PostConstruct;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -41,11 +46,13 @@ public class HomeView extends VerticalLayout {
     WrappedSession wrappedSession;
     ComboBox<Doctor> doctorDropdown = new ComboBox<>();
     FullCalendar calendar;
+    Button confirmButton = new Button();
+    Button cancelButton = new Button();
 
-    Image img=new Image("https://cdn.pixabay.com/photo/2014/12/10/20/56/medical-563427_960_720.jpg","banner");
+    Image img = new Image("https://cdn.pixabay.com/photo/2014/12/10/20/56/medical-563427_960_720.jpg", "banner");
 
-    H2 foglalasH2=new H2("Foglalás:");
-    Button foglalasButton=new Button("Időpont lefoglalása!");
+    H2 foglalasH2 = new H2("Foglalás:");
+    Button foglalasButton = new Button("Időpont lefoglalása!");
 
     int choosenDoctorId;
 
@@ -58,8 +65,10 @@ public class HomeView extends VerticalLayout {
     @Autowired
     TimetableService timetableService;
 
-    Optional<Timetable> timetable = Optional.of(new Timetable());
+    @Autowired
+    AppointmentService appointmentService;
 
+    Optional<Timetable> timetable = Optional.of(new Timetable());
     Patient patient = new Patient();
 
     public HomeView() {
@@ -68,7 +77,7 @@ public class HomeView extends VerticalLayout {
     @PostConstruct
     public void init() {
         wrappedSession = session.getSession();
-        if (wrappedSession.getAttribute(Names.USERNAME) !=null) {
+        if (wrappedSession.getAttribute(Names.USERNAME) != null) {
             menuBar.setOpenOnHover(true);
 
             MenuItem foglalas = menuBar.addItem("Időpont foglalás");
@@ -76,10 +85,22 @@ public class HomeView extends VerticalLayout {
             MenuItem profil = menuBar.addItem("Profilom");
             MenuItem loguot = menuBar.addItem("Kijelentkezes");
             //patient=patientService.findByEmail(wrappedSession.getAttribute(Names.USERNAME).toString());
+            profil.addClickListener(click -> {
+                UI.getCurrent().navigate(ProfilView.class);
+            });
+
             loguot.addClickListener(click -> {
                 Notification.show("Sikeres kijelentkezes!", 1500, Notification.Position.MIDDLE);
-                wrappedSession.setAttribute(Names.USERNAME,null);
+                wrappedSession.setAttribute(Names.USERNAME, null);
                 UI.getCurrent().navigate(Login.class);
+            });
+
+            lista.addClickListener(click -> {
+                UI.getCurrent().navigate(BookingsView.class);
+            });
+
+            foglalas.addClickListener(click -> {
+                UI.getCurrent().navigate(HomeView.class);
             });
 
             doctorDropdown.setLabel("Orvosok:");
@@ -100,39 +121,75 @@ public class HomeView extends VerticalLayout {
             //horizontalLayout.add(calendar,foglalasH2,foglalasButton);
             add(verticalLayout);
             add(doctorDropdown, calendar);
-        }else {
+
+        } else {
             UI.getCurrent().navigate(Login.class);
             UI.getCurrent().getPage().executeJs("location.reload();");
         }
     }
 
-    void addCalendar(){
+    void addCalendar() {
         remove(verticalLayout);
-        remove(doctorDropdown,calendar);
+        remove(doctorDropdown, calendar);
         calendar = FullCalendarBuilder.create().build();
         calendar.setLocale(CalendarLocale.HUNGARIAN);
         calendar.setFirstDay(DayOfWeek.MONDAY);
-        calendar.setMinTime(LocalTime.of(6,00));
-        calendar.setMaxTime(LocalTime.of(21,00));
-        if(choosenDoctorId==0){
+        calendar.setMinTime(LocalTime.of(6, 00));
+        calendar.setMaxTime(LocalTime.of(21, 00));
+        calendar.setWeekNumbersVisible(false);
+
+        if (choosenDoctorId == 0) {
             addTimetableToCalendar(calendar, doctorDropdown.getValue().getId());
-        }else{
-            addTimetableToCalendar(calendar,choosenDoctorId);
+        } else {
+            addTimetableToCalendar(calendar, choosenDoctorId);
         }
 
         calendar.changeView(CalendarViewImpl.TIME_GRID_WEEK);
         BusinessHours businessHours = new BusinessHours(LocalTime.of(6, 00), LocalTime.of(18, 00));
         calendar.setBusinessHours(businessHours);
-        calendar.setMaxWidth("50%");
+        calendar.setMaxWidth("70%");
         calendar.setMinHeight("600px");
+        calendar.getStyle().set("aligment","center");
 
-/*        calendar.addEntryClickedListener(entryClickedEvent -> {
-            entryClickedEvent.getEntry().setColor("red");
-            System.out.println( entryClickedEvent.getEntry().getStart());
-        });*/
+        calendar.addEntryClickedListener(entryClickedEvent -> {
+            if (entryClickedEvent.getEntry().getColor()!="#ff0000"){
+                Dialog dialog = new Dialog();
+                H2 foglalas = new H2("Foglalás:");
+                H3 doctorH3 = new H3("Orvos neve:");
+                H4 doctorName = new H4(doctorDropdown.getValue().getFullName());
+                H2 idopont = new H2("Időpont:");
+                H3 ido = new H3(String.valueOf(entryClickedEvent.getEntry().getRecurringStartTime()));
+
+                dialog.setHeight("300px");
+                dialog.setWidth("400px");
+                dialog.open();
+                dialog.setCloseOnEsc(false);
+                dialog.setCloseOnOutsideClick(false);
+                confirmButton = new Button("Foglalás!", event -> {
+                    Entry redEntry = entryClickedEvent.getEntry();
+                    redEntry.setColor("#ff0000");
+                    calendar.removeEntry(entryClickedEvent.getEntry());
+                    calendar.addEntry(redEntry);
+                    calendar.render();
+                    dialog.close();
+                    //TODO save appointment to DB
+                    Notification.show("Sikeres foglalás", 4000, Notification.Position.MIDDLE);
+                });
+
+                cancelButton = new Button("Vissza!", event -> {
+                    dialog.close();
+                });
+
+                dialog.add(foglalas);
+                dialog.add(doctorH3,doctorName);
+                dialog.add(idopont,ido);
+                dialog.add(confirmButton, cancelButton);
+            }
+
+        });
 
         img.setMaxHeight("300 px");
-        verticalLayout.add(img,menuBar);
+        verticalLayout.add(img, menuBar);
         //verticalLayout.add(nev);
 
         add(verticalLayout);
@@ -147,43 +204,47 @@ public class HomeView extends VerticalLayout {
         String thursday = timetable.get().getThursday();
         String friday = timetable.get().getFriday();
 
-        addEntryToCalendar(monday,DayOfWeek.MONDAY,calendar);
-        addEntryToCalendar(tuesday,DayOfWeek.TUESDAY,calendar);
-        addEntryToCalendar(wednesday,DayOfWeek.WEDNESDAY,calendar);
-        addEntryToCalendar(thursday,DayOfWeek.THURSDAY,calendar);
-        addEntryToCalendar(friday,DayOfWeek.FRIDAY,calendar);
+        addEntryToCalendar(monday, DayOfWeek.MONDAY, calendar);
+        addEntryToCalendar(tuesday, DayOfWeek.TUESDAY, calendar);
+        addEntryToCalendar(wednesday, DayOfWeek.WEDNESDAY, calendar);
+        addEntryToCalendar(thursday, DayOfWeek.THURSDAY, calendar);
+        addEntryToCalendar(friday, DayOfWeek.FRIDAY, calendar);
     }
 
-    void addEntryToCalendar(String day, DayOfWeek dayOfWeek,FullCalendar calendar) {
+    void addEntryToCalendar(String day, DayOfWeek dayOfWeek, FullCalendar calendar) {
         String[] parts = day.split("-");
         String part1 = parts[0];
         String part2 = parts[1];
         LocalTime from = LocalTime.parse(part1);
         LocalTime to = LocalTime.parse(part2);
-        List<Entry> idopontok=new LinkedList<>();
+        List<Entry> idopontok = new LinkedList<>();
 
-        while(from.isBefore(to)){
+        while (from.isBefore(to)) {
             Entry entry = new Entry();
             entry.setColor("#009900");
             entry.setRecurringDaysOfWeeks(Collections.singleton(dayOfWeek));
+            entry.setRecurringEndDate(LocalDate.now().plusWeeks(1),calendar.getTimezone());
             entry.setRecurringStartTime(from);
             entry.setRecurringEndTime(from.plusMinutes(30));
             entry.setTitle("");
             entry.setEditable(false);
-            from=from.plusMinutes(30);
+            from = from.plusMinutes(30);
             idopontok.add(entry);
         }
 
-        for (Entry e: idopontok){
-            calendar.addEntry(e);
+        for (Entry e : idopontok) {
+            //calendar.addEntry(e);
         }
     }
 
-    void setStyle(){
-        UI.getCurrent().getElement().getStyle().set("width","100%");
-        UI.getCurrent().getElement().getStyle().set("background-color","100%");
-        verticalLayout.getStyle().set("background-color","#f3f5f7");
-        verticalLayout.getStyle().set("border-radius","15px");
-        foglalasH2.getStyle().set("margin-top","0px");
+    void setStyle() {
+        UI.getCurrent().getElement().getStyle().set("width", "100%");
+        //UI.getCurrent().getElement().getStyle().set("background-color", "100%");
+        verticalLayout.getStyle().set("background-color", "#f3f5f7");
+        verticalLayout.getStyle().set("border-radius", "15px");
+        foglalasH2.getStyle().set("margin-top", "0px");
+        confirmButton.getStyle().set("padding", "20px");
+        cancelButton.getStyle().set("padding", "20px");
+
     }
 }
