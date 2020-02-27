@@ -1,12 +1,12 @@
 package szakdoga.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import szakdoga.repository.AppointmentRepository;
+import szakdoga.entity.Appointment;
 
-@Service
-public class AppointmentService {
+import java.util.List;
 
-    @Autowired
-    AppointmentRepository appointmentRepository;
+public interface AppointmentService {
+
+    void save(Appointment appointment);
+
+    List<Appointment> getAll();
 }

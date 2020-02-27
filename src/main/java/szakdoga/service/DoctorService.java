@@ -9,5 +9,5 @@ public interface DoctorService {
 
     Doctor findByEmail(String email);
     List<Doctor> getAll();
-    void save(Doctor patient);
+    void save(Doctor doctor);
 }

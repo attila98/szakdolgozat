@@ -1,8 +1,13 @@
 package szakdoga.entity;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import szakdoga.service.DoctorService;
+
 import javax.persistence.*;
 import java.util.Date;
 
+@Component
 @Entity
 @Table(name ="appointment")
 public class Appointment {
@@ -30,6 +35,10 @@ public class Appointment {
     public Appointment() {
     }
 
+    @Autowired
+    @Transient
+    DoctorService doctorService;
+
     public Integer getId() {
         return id;
     }
@@ -40,6 +49,13 @@ public class Appointment {
 
     public Date getDate() {
         return date;
+    }
+
+    public String getFormattedDate(){
+        String dateString = String.valueOf(date);
+        int space=dateString.indexOf(" ");
+        dateString=dateString.substring(0,space);
+        return dateString;
     }
 
     public void setDate(Date date) {

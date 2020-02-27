@@ -2,6 +2,8 @@ package szakdoga.View;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.menubar.MenuBar;
@@ -11,9 +13,17 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.WrappedSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import szakdoga.Names;
+import szakdoga.entity.Appointment;
+import szakdoga.entity.Patient;
+import szakdoga.service.AppointmentService;
+import szakdoga.service.PatientService;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Route(value = "bookings")
 @PageTitle("Foglalasok")
@@ -22,9 +32,25 @@ public class BookingsView extends VerticalLayout {
     VaadinSession session = UI.getCurrent().getSession();
     WrappedSession wrappedSession;
     VerticalLayout verticalLayout = new VerticalLayout();
+    VerticalLayout verticalLayout2 = new VerticalLayout();
 
     Image img = new Image("https://cdn.pixabay.com/photo/2014/12/10/20/56/medical-563427_960_720.jpg", "banner");
     MenuBar menuBar = new MenuBar();
+
+    H1 title=new H1("Foglalásaim:");
+
+    @Autowired
+    AppointmentService appointmentService;
+
+    @Autowired
+    PatientService patientService;
+
+    Patient patient = new Patient();
+
+
+    List<Appointment> appointmentList=new ArrayList<>();
+
+    Grid<Appointment> appointmentGrid= new Grid<>();
 
     public BookingsView() {
     }
@@ -38,7 +64,7 @@ public class BookingsView extends VerticalLayout {
             MenuItem lista = menuBar.addItem("Foglalásaim");
             MenuItem profil = menuBar.addItem("Profilom");
             MenuItem loguot = menuBar.addItem("Kijelentkezes");
-            //patient=patientService.findByEmail(wrappedSession.getAttribute(Names.USERNAME).toString());
+            patient=patientService.findByEmail(wrappedSession.getAttribute(Names.USERNAME).toString());
             profil.addClickListener(click -> {
                 UI.getCurrent().navigate(ProfilView.class);
             });
@@ -61,9 +87,18 @@ public class BookingsView extends VerticalLayout {
 
             verticalLayout.add(img, menuBar);
             add(verticalLayout);
-            add(new H1("TODO"));
+            add(title);
 
 
+            appointmentList = appointmentService.getAll().stream().filter(app -> app.getPatient_id()==patient.getId()).collect(Collectors.toList());
+            appointmentGrid.setItems(appointmentList);
+            appointmentGrid.addColumn(Appointment::getFormattedDate).setHeader("Dátum");
+            appointmentGrid.addColumn(Appointment::getStartapp).setHeader("Hány órától");
+            appointmentGrid.addColumn(Appointment::getEndapp).setHeader("Meddig");
+            appointmentGrid.addColumn(Appointment::getDoctor_id).setHeader("Orvos neve");
+            appointmentGrid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES,GridVariant.LUMO_NO_BORDER);
+            verticalLayout2.add(title,appointmentGrid);
+            add(verticalLayout2);
         } else {
             UI.getCurrent().navigate(Login.class);
             UI.getCurrent().getPage().executeJs("location.reload();");
@@ -74,5 +109,10 @@ public class BookingsView extends VerticalLayout {
         UI.getCurrent().getElement().getStyle().set("width", "100%");
         verticalLayout.getStyle().set("background-color", "#f3f5f7");
         verticalLayout.getStyle().set("border-radius", "15px");
+
+        verticalLayout2.getStyle().set("background-color", "#f3f5f7");
+        verticalLayout2.getStyle().set("border-radius", "15px");
+
+        appointmentGrid.getStyle().set("background-color", "#f3f5f7");
     }
 }
