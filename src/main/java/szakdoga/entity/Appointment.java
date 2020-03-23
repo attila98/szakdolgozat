@@ -6,9 +6,10 @@ import szakdoga.service.DoctorService;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
-@Component
 @Entity
+@Component
 @Table(name ="appointment")
 public class Appointment {
 
@@ -92,5 +93,15 @@ public class Appointment {
 
     public void setDoctor_id(Integer doctor_id) {
         this.doctor_id = doctor_id;
+    }
+
+    public String getDoctorNameById(){
+        List<Doctor> allDoctor = doctorService.getAll();
+        for(Doctor doctor : allDoctor){
+            if (doctor.getId()==this.id){
+                return doctor.getFullName();
+            }
+        }
+        return "Hiba";
     }
 }

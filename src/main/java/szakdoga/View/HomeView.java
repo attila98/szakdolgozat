@@ -11,7 +11,6 @@ import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
@@ -31,6 +30,7 @@ import szakdoga.service.TimetableService;
 import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
@@ -39,7 +39,8 @@ import java.util.*;
 public class HomeView extends VerticalLayout {
 
     VerticalLayout verticalLayout = new VerticalLayout();
-    HorizontalLayout horizontalLayout = new HorizontalLayout();
+    VerticalLayout calendarLayout = new VerticalLayout();
+    VerticalLayout calendarButtonLayout = new VerticalLayout();
     MenuBar menuBar = new MenuBar();
     VaadinSession session = UI.getCurrent().getSession();
     WrappedSession wrappedSession;
@@ -47,12 +48,15 @@ public class HomeView extends VerticalLayout {
     FullCalendar calendar;
     Button confirmButton = new Button();
     Button cancelButton = new Button();
+    Button nextWeekButton = new Button();
+    Button previousWeekButton = new Button();
 
-    Image img = new Image("https://cdn.pixabay.com/photo/2014/12/10/20/56/medical-563427_960_720.jpg", "banner");
-
+    Image img = new Image("header.png","banner");
 
     H2 foglalasH2 = new H2("Foglalás:");
     Button foglalasButton = new Button("Időpont lefoglalása!");
+
+    Calendar cal = Calendar.getInstance();
 
     int choosenDoctorId;
 
@@ -74,6 +78,7 @@ public class HomeView extends VerticalLayout {
     Appointment appointment=new Appointment();
 
     public HomeView() {
+        UI.getCurrent().getPage().addStyleSheet("/back.css");
     }
 
     @PostConstruct
@@ -112,18 +117,35 @@ public class HomeView extends VerticalLayout {
             doctorDropdown.setValue(doctorList.get(0));
 
             doctorDropdown.addValueChangeListener(event -> {
-                if (event.getValue() == null) {
+               /* if (event.getValue() == null) {
                     addCalendar();
                 } else {
                     addCalendar();
-                }
+                }*/
             });
             setStyle();
             addCalendar();
             //horizontalLayout.add(calendar,foglalasH2,foglalasButton);
             add(verticalLayout);
-            add(doctorDropdown, calendar);
-
+            cal.set(Calendar.WEEK_OF_YEAR, cal.get(Calendar.WEEK_OF_YEAR));
+            nextWeekButton.setText("Következő hét");
+            previousWeekButton.setText("Előző hét");
+            previousWeekButton.setEnabled(false);
+            nextWeekButton.addClickListener( click -> {
+                calendar.next();
+                nextWeekButton.setEnabled(false);
+                previousWeekButton.setEnabled(true);
+                cal.set(Calendar.WEEK_OF_YEAR, cal.get(Calendar.WEEK_OF_YEAR)+1);
+            });
+            previousWeekButton.addClickListener(click -> {
+                calendar.previous();
+                previousWeekButton.setEnabled(false);
+                nextWeekButton.setEnabled(true);
+                cal.set(Calendar.WEEK_OF_YEAR, cal.get(Calendar.WEEK_OF_YEAR)-1);
+            });
+            calendarButtonLayout.add(previousWeekButton,nextWeekButton);
+            calendarLayout.add(doctorDropdown,calendarButtonLayout,calendar);
+            add(calendarLayout);
         } else {
             UI.getCurrent().navigate(Login.class);
             UI.getCurrent().getPage().executeJs("location.reload();");
@@ -140,6 +162,7 @@ public class HomeView extends VerticalLayout {
         calendar.setMaxTime(LocalTime.of(21, 00));
         calendar.setWeekNumbersVisible(false);
 
+
         if (choosenDoctorId == 0) {
             addTimetableToCalendar(calendar, doctorDropdown.getValue().getId());
         } else {
@@ -149,9 +172,10 @@ public class HomeView extends VerticalLayout {
         calendar.changeView(CalendarViewImpl.TIME_GRID_WEEK);
         BusinessHours businessHours = new BusinessHours(LocalTime.of(6, 00), LocalTime.of(18, 00));
         calendar.setBusinessHours(businessHours);
-        calendar.setMaxWidth("70%");
+        calendar.setMaxWidth("90%");
         calendar.setMinHeight("600px");
         calendar.getStyle().set("aligment","center");
+        addEntryToCalendarFromDB();
 
         calendar.addEntryClickedListener(entryClickedEvent -> {
             if (entryClickedEvent.getEntry().getColor()!="#ff0000"){
@@ -160,13 +184,13 @@ public class HomeView extends VerticalLayout {
                 H3 doctorH3 = new H3("Orvos neve:");
                 H4 doctorName = new H4(doctorDropdown.getValue().getFullName());
                 H2 idopont = new H2("Időpont:");
-
+                System.out.println(entryClickedEvent.getEntry());
                 H3 ido=new H3();
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                Calendar cal = Calendar.getInstance();
-                cal.set(Calendar.WEEK_OF_YEAR, cal.get(Calendar.DAY_OF_WEEK));
+
                 String day= String.valueOf(entryClickedEvent.getEntry().getRecurringDaysOfWeeks()).replaceAll("\\[","").replaceAll("\\]","");
                 cal.set(Calendar.DAY_OF_WEEK, getDayNumber(day));
+                System.out.println(cal.getTime());
                 String date=sdf.format(cal.getTime()) + "  "+ entryClickedEvent.getEntry().getRecurringStartTime() +"-"+ entryClickedEvent.getEntry().getRecurringEndTime();
                 ido.setText(date);
                 dialog.setHeight("300px");
@@ -201,13 +225,11 @@ public class HomeView extends VerticalLayout {
             }
 
         });
-
-        img.setMaxHeight("300 px");
+        //img.setMaxHeight("300 px");
         verticalLayout.add(img, menuBar);
-        //verticalLayout.add(nev);
 
-        add(verticalLayout);
-        add(doctorDropdown, calendar);
+        //add(verticalLayout);
+        //add(doctorDropdown, calendar);
     }
 
     void addTimetableToCalendar(FullCalendar calendar, Integer id) {
@@ -240,9 +262,10 @@ public class HomeView extends VerticalLayout {
             entry.setRecurringEndDate(LocalDate.now().plusWeeks(2),calendar.getTimezone());
             entry.setRecurringStartTime(from);
             entry.setRecurringEndTime(from.plusMinutes(30));
-            entry.setRecurringStartDate(LocalDate.now(),calendar.getTimezone());
+            entry.setRecurringStartDate(LocalDate.now().with(DayOfWeek.MONDAY),calendar.getTimezone());
             entry.setTitle("");
             entry.setEditable(false);
+
             from = from.plusMinutes(30);
             idopontok.add(entry);
         }
@@ -252,14 +275,51 @@ public class HomeView extends VerticalLayout {
         }
     }
 
+    void addEntryToCalendarFromDB(){
+        List<Appointment> allAppointment = appointmentService.getAll();
+        for(int i=0;i<allAppointment.size();i++){
+            Appointment current = allAppointment.get(i);
+            Entry bookedEntry = new Entry();
+            bookedEntry.setColor("#ff0000");
+            bookedEntry.setStart(Instant.parse(current.getFormattedDate() +"T"+ current.getStartapp()+":00.00Z"));
+            bookedEntry.setEnd(Instant.parse(current.getFormattedDate() +"T"+current.getEndapp()+":00.00Z"));
+            bookedEntry.setTitle("Foglalt");
+            bookedEntry.setEditable(false);
+            calendar.addEntry(bookedEntry);
+        }
+    }
+
     void setStyle() {
         UI.getCurrent().getElement().getStyle().set("width", "100%");
         //UI.getCurrent().getElement().getStyle().set("background-color", "100%");
         verticalLayout.getStyle().set("background-color", "#f3f5f7");
         verticalLayout.getStyle().set("border-radius", "15px");
+        verticalLayout.getStyle().set("border","double");
+        verticalLayout.getStyle().set("align-self","center");
+        verticalLayout.getStyle().set("width","90%");
+        menuBar.getStyle().set("padding-left","20px");
+
+
         foglalasH2.getStyle().set("margin-top", "0px");
         confirmButton.getStyle().set("margin", "20px");
         cancelButton.getStyle().set("margin", "20px");
+
+        calendarLayout.getStyle().set("background-color", "#f3f5f7");
+        calendarLayout.getStyle().set("border-radius", "15px");
+        calendarLayout.getStyle().set("border","double");
+        calendarLayout.getStyle().set("align-self","center");
+        calendarLayout.setAlignItems(Alignment.CENTER);
+        calendarLayout.setWidth("90%");
+
+        calendarButtonLayout.setWidth("90%");
+        calendarButtonLayout.getStyle().set("display","block");
+        calendarButtonLayout.getStyle().set("padding-bottom","0px");
+        nextWeekButton.getStyle().set("margin-left","760px");
+
+        img.getStyle().set("width","1100px");
+        img.getStyle().set("align-self","center");
+        img.getStyle().set("border-radius","15px");
+        img.getStyle().set("border","1px solid");
 
     }
 

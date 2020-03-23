@@ -1,6 +1,7 @@
 package szakdoga.View;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H2;
@@ -34,8 +35,9 @@ public class ProfilView extends VerticalLayout {
     TextField lastName =new TextField();
     TextField email =new TextField();
     TextField tb_number =new TextField();
+    Button ok = new Button();
 
-    Image img = new Image("https://cdn.pixabay.com/photo/2014/12/10/20/56/medical-563427_960_720.jpg", "banner");
+    Image img = new Image("header.png", "banner");
     MenuBar menuBar = new MenuBar();
 
     @Autowired
@@ -102,8 +104,11 @@ public class ProfilView extends VerticalLayout {
         tb_number.setValue(patient.getTb_number());
         tb_number.setLabel("TB szám");
 
+        ok.setText("Mentés!");
+
         profilLayout.setColspan(titleField,4);
-        profilLayout.add(titleField,firstName,lastName,email,tb_number);
+        profilLayout.setColspan(ok,4);
+        profilLayout.add(titleField,firstName,lastName,email,tb_number,ok);
         add(profilLayout);
     }
 
@@ -111,10 +116,27 @@ public class ProfilView extends VerticalLayout {
         UI.getCurrent().getElement().getStyle().set("width", "100%");
         verticalLayout.getStyle().set("background-color", "#f3f5f7");
         verticalLayout.getStyle().set("border-radius", "15px");
+        verticalLayout.getStyle().set("border","double");
+        verticalLayout.getStyle().set("align-self","center");
+        verticalLayout.getStyle().set("width","90%");
+
+        menuBar.getStyle().set("padding-left","20px");
 
         profilLayout.getStyle().set("background-color", "#f3f5f7");
         profilLayout.getStyle().set("border-radius", "15px");
-        profilLayout.getStyle().set("padding","20px");
+        profilLayout.getStyle().set("padding","20px 20px 100px 20px");
+        profilLayout.getStyle().set("border","double");
+        profilLayout.getStyle().set("align-self","center");
+        profilLayout.getStyle().set("width","87%");
+
+        img.getStyle().set("width","1100px");
+        img.getStyle().set("align-self","center");
+        img.getStyle().set("border-radius","15px");
+        img.getStyle().set("border","1px solid");
+
+        ok.getStyle().set("margin-top","20px");
+        ok.setMaxWidth("10%");
+        ok.getStyle().set("width","10%");
     }
 
 }

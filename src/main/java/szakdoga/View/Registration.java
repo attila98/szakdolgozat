@@ -81,6 +81,7 @@ public class Registration extends VerticalLayout {
     BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public Registration(){
+        UI.getCurrent().getPage().addStyleSheet("/back.css");
     }
 
     @PostConstruct
@@ -89,6 +90,7 @@ public class Registration extends VerticalLayout {
         verticalLayout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
         verticalLayout.setSpacing(false);
         verticalLayout.setMargin(false);
+        verticalLayout.setHeight("800px");
         setDefaultHorizontalComponentAlignment(Alignment.END);
         H1 title=new H1("Orvosi időpontfoglaló rendszer");
         Button beteg=new Button("Betegként");
@@ -111,6 +113,7 @@ public class Registration extends VerticalLayout {
         patientFormLayout.setVisible(true);
         doctorFormLayout.setVisible(false);
         doctorFormLayout2.setVisible(false);
+        patientFormLayout.remove(firstName,lastName,email,password,tb_number,ok,back);
 
         firstName.focus();
         firstName.setPlaceholder("Nagy");
@@ -129,7 +132,7 @@ public class Registration extends VerticalLayout {
         tb_number.setLabel("TB szám");
 
         ok.setText("Regisztráció");
-        back.setText("Vissza");
+        back.setText("Vissza a bejelentkező oldalra!");
         back.addClickListener(buttonClickEvent -> UI.getCurrent().navigate(Login.class));
         patientFormLayout.add(firstName,lastName,email,password,tb_number,ok,back);
         ok.addClickListener(buttonClickEvent ->    {
@@ -144,6 +147,7 @@ public class Registration extends VerticalLayout {
                 Notification.show("Sikeres regisztráció!",2000,Notification.Position.MIDDLE);
                 UI.getCurrent().navigate(Login.class);
             }else {
+
                 Notification.show("Hibás adat!",1000,Notification.Position.MIDDLE);
             }
         });
@@ -256,7 +260,6 @@ public class Registration extends VerticalLayout {
 
         lastNameD.setMinLength(2);
         lastNameD.setMaxLength(20);
-        lastNameD.setPattern("^[a-zA-Z_]*$");
         lastNameD.setErrorMessage("Hibás formátum!");
 
         passwordD.setMinLength(6);
@@ -294,16 +297,28 @@ public class Registration extends VerticalLayout {
         patientFormLayout.getStyle().set("display","block");
         patientFormLayout.getStyle().set("margin-left","auto");
         patientFormLayout.getStyle().set("margin-right","auto");
+        patientFormLayout.getStyle().set("background-color","#f6f7f7");
+        patientFormLayout.getStyle().set("padding","20px");
+        patientFormLayout.getStyle().set("border-radius","10px");
+        patientFormLayout.getStyle().set("border","double");
 
         doctorFormLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("25%",1));
         doctorFormLayout.setMaxWidth("70%");
         doctorFormLayout.getStyle().set("display","block");
         doctorFormLayout.getStyle().set("margin-left","auto");
         doctorFormLayout.getStyle().set("margin-right","auto");
+        doctorFormLayout.getStyle().set("background-color","#f6f7f7");
+        doctorFormLayout.getStyle().set("padding","20px");
+        doctorFormLayout.getStyle().set("border-radius","10px");
+        doctorFormLayout.getStyle().set("border","double");
 
         doctorFormLayout2.setMaxWidth("70%");
         doctorFormLayout2.getStyle().set("display","block");
         doctorFormLayout2.getStyle().set("margin-left","auto");
         doctorFormLayout2.getStyle().set("margin-right","auto");
+        doctorFormLayout2.getStyle().set("background-color","#f6f7f7");
+        doctorFormLayout2.getStyle().set("padding","20px");
+        doctorFormLayout2.getStyle().set("border-radius","10px");
+        doctorFormLayout2.getStyle().set("border","double");
     }
 }

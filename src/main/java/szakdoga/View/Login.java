@@ -1,14 +1,11 @@
 package szakdoga.View;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import szakdoga.Names;
-import szakdoga.entity.Doctor;
-import szakdoga.entity.Patient;
-import szakdoga.service.DoctorService;
-import szakdoga.service.PatientService;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.notification.Notification;
@@ -18,6 +15,12 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.WrappedSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import szakdoga.Names;
+import szakdoga.entity.Doctor;
+import szakdoga.entity.Patient;
+import szakdoga.service.DoctorService;
+import szakdoga.service.PatientService;
 
 import javax.annotation.PostConstruct;
 
@@ -25,8 +28,8 @@ import javax.annotation.PostConstruct;
 @PageTitle("Login")
 public class Login extends VerticalLayout {
     final LoginI18n i18n = LoginI18n.createDefault();
-    private LoginForm PatientLoginForm = new LoginForm();
-    private LoginForm DoctorLoginForm = new LoginForm();
+    LoginForm PatientLoginForm = new LoginForm();
+    LoginForm DoctorLoginForm = new LoginForm();
     VerticalLayout verticalLayout=new VerticalLayout();
     VaadinSession vaadinSession = UI.getCurrent().getSession();
     WrappedSession wrappedSession;
@@ -41,15 +44,18 @@ public class Login extends VerticalLayout {
 
     BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public Login() {}
+    public Login() {
+        UI.getCurrent().getPage().addStyleSheet("/back.css");
+    }
 
     @PostConstruct
     public void startLogin(){
         wrappedSession = vaadinSession.getSession();
+        setStyle();
         verticalLayout.setSpacing(false);
         verticalLayout.setMargin(false);
+        verticalLayout.setHeight("800px");
         H1 title=new H1("Orvosi időpontfoglaló rendszer");
-
         Button beteg=new Button("Betegként");
         Button orvos=new Button("Orvosként");
         H2 login=new H2("Bejelentkezés: ");
@@ -125,5 +131,15 @@ public class Login extends VerticalLayout {
         DoctorLoginForm.setVisible(true);
         DoctorLoginForm.setI18n(createHungarianOrvos());
         verticalLayout.add(DoctorLoginForm);
+    }
+
+    void setStyle(){
+        PatientLoginForm.getElement().getStyle().set("background-color","#f6f7f7");
+        PatientLoginForm.getElement().getStyle().set("border-radius","10px");
+        PatientLoginForm.getElement().getStyle().set("border","double");
+
+        DoctorLoginForm.getElement().getStyle().set("background-color","#f6f7f7");
+        DoctorLoginForm.getElement().getStyle().set("border-radius","10px");
+        DoctorLoginForm.getElement().getStyle().set("border","double");
     }
 }

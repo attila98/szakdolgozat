@@ -34,7 +34,7 @@ public class BookingsView extends VerticalLayout {
     VerticalLayout verticalLayout = new VerticalLayout();
     VerticalLayout verticalLayout2 = new VerticalLayout();
 
-    Image img = new Image("https://cdn.pixabay.com/photo/2014/12/10/20/56/medical-563427_960_720.jpg", "banner");
+    Image img = new Image("header.png", "banner");
     MenuBar menuBar = new MenuBar();
 
     H1 title=new H1("Foglalásaim:");
@@ -109,10 +109,23 @@ public class BookingsView extends VerticalLayout {
         UI.getCurrent().getElement().getStyle().set("width", "100%");
         verticalLayout.getStyle().set("background-color", "#f3f5f7");
         verticalLayout.getStyle().set("border-radius", "15px");
+        verticalLayout.getStyle().set("border","double");
+        verticalLayout.getStyle().set("align-self","center");
+        verticalLayout.getStyle().set("width","90%");
 
         verticalLayout2.getStyle().set("background-color", "#f3f5f7");
         verticalLayout2.getStyle().set("border-radius", "15px");
+        verticalLayout2.getStyle().set("border","double");
+        verticalLayout2.getStyle().set("align-self","center");
+        verticalLayout2.getStyle().set("width","90%");
+
+        menuBar.getStyle().set("padding-left","20px");
 
         appointmentGrid.getStyle().set("background-color", "#f3f5f7");
+
+        img.getStyle().set("width","1100px");
+        img.getStyle().set("align-self","center");
+        img.getStyle().set("border-radius","15px");
+        img.getStyle().set("border","1px solid");
     }
 }
