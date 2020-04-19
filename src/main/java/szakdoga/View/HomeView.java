@@ -50,6 +50,7 @@ public class HomeView extends VerticalLayout {
     Button cancelButton = new Button();
     Button nextWeekButton = new Button();
     Button previousWeekButton = new Button();
+    Dialog dialog = new Dialog();
 
     Image img = new Image("header.png","banner");
 
@@ -179,7 +180,6 @@ public class HomeView extends VerticalLayout {
 
         calendar.addEntryClickedListener(entryClickedEvent -> {
             if (entryClickedEvent.getEntry().getColor()!="#ff0000"){
-                Dialog dialog = new Dialog();
                 H2 foglalas = new H2("Foglalás:");
                 H3 doctorH3 = new H3("Orvos neve:");
                 H4 doctorName = new H4(doctorDropdown.getValue().getFullName());
@@ -301,7 +301,9 @@ public class HomeView extends VerticalLayout {
 
 
         foglalasH2.getStyle().set("margin-top", "0px");
-        confirmButton.getStyle().set("margin", "20px");
+        dialog.setCloseOnEsc(true);
+        dialog.getElement().getStyle().set("border","double");
+        confirmButton.getStyle().set("margin-right", "120px");
         cancelButton.getStyle().set("margin", "20px");
 
         calendarLayout.getStyle().set("background-color", "#f3f5f7");

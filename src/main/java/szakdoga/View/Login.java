@@ -52,9 +52,6 @@ public class Login extends VerticalLayout {
     public void startLogin(){
         wrappedSession = vaadinSession.getSession();
         setStyle();
-        verticalLayout.setSpacing(false);
-        verticalLayout.setMargin(false);
-        verticalLayout.setHeight("800px");
         H1 title=new H1("Orvosi időpontfoglaló rendszer");
         Button beteg=new Button("Betegként");
         Button orvos=new Button("Orvosként");
@@ -86,8 +83,8 @@ public class Login extends VerticalLayout {
             doctor=doctorService.findByEmail(loginEvent.getUsername());
             if (doctorService.findByEmail(loginEvent.getUsername()) != null && doctor.getPassword().equals(loginEvent.getPassword())){
                 Notification.show("Sikeres bejelentkezés!",2000,Notification.Position.MIDDLE);
-                wrappedSession.setAttribute(Names.USERNAME,doctor.getEmail());
-                UI.getCurrent().navigate(HomeView.class);
+                wrappedSession.setAttribute(Names.DOCTOR,doctor.getEmail());
+                UI.getCurrent().navigate(DoctorHomeView.class);
             }else{
                 Notification.show("Hibas felhsznalonev vagy jelszo!");
                 DoctorLoginForm.setEnabled(true);
@@ -134,6 +131,10 @@ public class Login extends VerticalLayout {
     }
 
     void setStyle(){
+        verticalLayout.setSpacing(false);
+        verticalLayout.setMargin(false);
+        verticalLayout.setHeight("800px");
+
         PatientLoginForm.getElement().getStyle().set("background-color","#f6f7f7");
         PatientLoginForm.getElement().getStyle().set("border-radius","10px");
         PatientLoginForm.getElement().getStyle().set("border","double");

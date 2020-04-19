@@ -80,6 +80,18 @@ public class ProfilView extends VerticalLayout {
             verticalLayout.add(img, menuBar);
             add(verticalLayout);
             loadProfil();
+            fieldsValidationSetUp();
+
+            ok.addClickListener(click -> {
+                if(textFieldIsValid()){
+                    patient.setFirst_name(firstName.getValue());
+                    patient.setLast_name(lastName.getValue());
+                    patient.setEmail(email.getValue());
+                    patient.setTb_number(tb_number.getValue());
+                    patientService.save(patient);
+                    Notification.show("Sikeres adatmódosítás!",2000,Notification.Position.MIDDLE);
+                }
+            });
 
         } else {
             UI.getCurrent().navigate(Login.class);
@@ -110,6 +122,33 @@ public class ProfilView extends VerticalLayout {
         profilLayout.setColspan(ok,4);
         profilLayout.add(titleField,firstName,lastName,email,tb_number,ok);
         add(profilLayout);
+    }
+
+    void fieldsValidationSetUp(){
+        firstName.setMinLength(2);
+        firstName.setMaxLength(20);
+        firstName.setPattern("^[a-zA-Z_]*$");
+        firstName.setErrorMessage("Hibás formátum!");
+
+        lastName.setMinLength(2);
+        lastName.setMaxLength(20);
+        lastName.setPattern("^[a-zA-Z_]*$");
+        lastName.setErrorMessage("Hibás formátum!");
+
+        tb_number.setMinLength(9);
+        tb_number.setMaxLength(9);
+        tb_number.setPattern("^[0-9_]*$");
+        tb_number.setErrorMessage("Pontosan 9 számjegy!");
+
+        email.setPattern("^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:.[a-zA-Z0-9-]+)*$");
+        email.setErrorMessage("Hibás email formátum!");
+    }
+
+    boolean textFieldIsValid(){
+        if(firstName.isInvalid() || lastName.isInvalid() || email.isInvalid() || tb_number.isInvalid()
+                || firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || tb_number.isEmpty()){
+            return false;
+        }else return true;
     }
 
     void setStyle() {
