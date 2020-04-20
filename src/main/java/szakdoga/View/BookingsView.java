@@ -95,7 +95,7 @@ public class BookingsView extends VerticalLayout {
             appointmentGrid.addColumn(Appointment::getFormattedDate).setHeader("Dátum");
             appointmentGrid.addColumn(Appointment::getStartapp).setHeader("Hány órától");
             appointmentGrid.addColumn(Appointment::getEndapp).setHeader("Meddig");
-            appointmentGrid.addColumn(Appointment::getDoctor_id).setHeader("Orvos neve");
+            appointmentGrid.addColumn(Appointment::getDoctorName).setHeader("Orvos neve");
             appointmentGrid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES,GridVariant.LUMO_NO_BORDER);
             verticalLayout2.add(title,appointmentGrid);
             add(verticalLayout2);

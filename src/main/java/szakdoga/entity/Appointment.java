@@ -6,7 +6,6 @@ import szakdoga.service.DoctorService;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Component
@@ -33,12 +32,27 @@ public class Appointment {
     @Column(name="doctor_id")
     private Integer doctor_id;
 
+
+
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "doctor_id",  insertable = false, updatable = false)
+    private Doctor doctor;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "patient_id",  insertable = false, updatable = false)
+    private Patient patient;
+
     public Appointment() {
     }
 
     @Autowired
     @Transient
     DoctorService doctorService;
+
+    public Doctor getDoctor() {
+        return doctor;
+    }
 
     public Integer getId() {
         return id;
@@ -95,13 +109,13 @@ public class Appointment {
         this.doctor_id = doctor_id;
     }
 
-    public String getDoctorNameById(){
-        List<Doctor> allDoctor = doctorService.getAll();
-        for(Doctor doctor : allDoctor){
-            if (doctor.getId()==this.id){
-                return doctor.getFullName();
-            }
-        }
-        return "Hiba";
+    public String getDoctorName(){
+        return doctor.getFullName();
     }
+
+    public String getPatientName() {return patient.getFullName();}
+
+    public String getPatientTBNumber(){return patient.getTb_number();}
+
+    public String getPatientBDay(){return patient.getFormattedDate();}
 }

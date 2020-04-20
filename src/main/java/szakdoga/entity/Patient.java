@@ -88,4 +88,15 @@ public class Patient {
     public void setTb_number(String tb_number) {
         this.tb_number = tb_number;
     }
+
+    public String getFullName(){
+        return this.first_name+" "+this.last_name;
+    }
+
+    public String getFormattedDate(){
+        String dateString = String.valueOf(birth_day);
+        int space=dateString.indexOf(" ");
+        dateString=dateString.substring(0,space);
+        return dateString;
+    }
 }

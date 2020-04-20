@@ -57,7 +57,7 @@ public class ProfilView extends VerticalLayout {
             MenuItem lista = menuBar.addItem("Foglalásaim");
             MenuItem profil = menuBar.addItem("Profilom");
             MenuItem loguot = menuBar.addItem("Kijelentkezes");
-            //patient=patientService.findByEmail(wrappedSession.getAttribute(Names.USERNAME).toString());
+
             profil.addClickListener(click -> {
                 UI.getCurrent().navigate(ProfilView.class);
             });

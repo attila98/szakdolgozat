@@ -85,7 +85,7 @@ public class HomeView extends VerticalLayout {
     @PostConstruct
     public void init() {
         wrappedSession = session.getSession();
-        if (wrappedSession.getAttribute(Names.USERNAME) != null) {
+        if (wrappedSession.getAttribute(Names.USERNAME) != null && !wrappedSession.getAttribute(Names.USERNAME).toString().equals("")) {
             menuBar.setOpenOnHover(true);
 
             MenuItem foglalas = menuBar.addItem("Időpont foglalás");
@@ -205,6 +205,7 @@ public class HomeView extends VerticalLayout {
                     calendar.addEntry(redEntry);
                     calendar.render();
                     dialog.close();
+                    dialog.removeAll();
                     appointment.setPatient_id(patient.getId());
                     appointment.setDoctor_id(doctorDropdown.getValue().getId());
                     appointment.setDate(cal.getTime());
@@ -212,10 +213,12 @@ public class HomeView extends VerticalLayout {
                     appointment.setEndapp(String.valueOf(entryClickedEvent.getEntry().getRecurringEndTime()));
                     appointmentService.save(appointment);
                     Notification.show("Sikeres foglalás", 4000, Notification.Position.MIDDLE);
+
                 });
 
                 cancelButton = new Button("Vissza!", event -> {
                     dialog.close();
+                    dialog.removeAll();
                 });
 
                 dialog.add(foglalas);
@@ -304,7 +307,6 @@ public class HomeView extends VerticalLayout {
         dialog.setCloseOnEsc(true);
         dialog.getElement().getStyle().set("border","double");
         confirmButton.getStyle().set("margin-right", "120px");
-        cancelButton.getStyle().set("margin", "20px");
 
         calendarLayout.getStyle().set("background-color", "#f3f5f7");
         calendarLayout.getStyle().set("border-radius", "15px");
@@ -317,6 +319,7 @@ public class HomeView extends VerticalLayout {
         calendarButtonLayout.getStyle().set("display","block");
         calendarButtonLayout.getStyle().set("padding-bottom","0px");
         nextWeekButton.getStyle().set("margin-left","760px");
+        cancelButton.getStyle().set("margin-left","120px");
 
         img.getStyle().set("width","1100px");
         img.getStyle().set("align-self","center");

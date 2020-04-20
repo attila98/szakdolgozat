@@ -158,6 +158,7 @@ public class Registration extends VerticalLayout {
         patientFormLayout.setVisible(false);
         doctorFormLayout.setVisible(true);
         doctorFormLayout2.setVisible(false);
+        doctorFormLayout2.removeAll();
         doctorFormLayout.remove(firstNameD,lastNameD,emailD,passwordD,cityD,okD,backD);
 
         firstNameD.focus();
@@ -186,9 +187,9 @@ public class Registration extends VerticalLayout {
                 doctor.setFirst_name(firstNameD.getValue());
                 doctor.setLast_name(lastNameD.getValue());
                 doctor.setEmail(emailD.getValue());
-                doctor.setPassword(passwordD.getValue());
+                doctor.setPassword(passwordEncoder.encode(passwordD.getValue()));
                 doctor.setCity(cityD.getValue());
-                doctorService.save(doctor);
+
                 doctorFormLayout.setVisible(false);
                 doctorFormLayout2.setVisible(true);
             }else {
@@ -210,15 +211,20 @@ public class Registration extends VerticalLayout {
         doctorFormLayout2.remove(title,mondayFrom,mondayTo,tuesdayFrom,tuesdayTo,wednesdayFrom,wednesdayTo,thursdayFrom
                 ,thursdayTo,fridayFrom,fridayTo,reg);
         reg.addClickListener(c -> {
-            timetable.setMonday(mondayFrom.getValue().toString() +"-"+mondayTo.getValue().toString());
-            timetable.setTuesday(tuesdayFrom.getValue().toString() +"-"+ tuesdayTo.getValue().toString());
-            timetable.setWednesday(wednesdayFrom.getValue().toString()+"-"+wednesdayTo.getValue().toString());
-            timetable.setThursday(thursdayFrom.getValue().toString() +"-"+ thursdayTo.getValue().toString());
-            timetable.setFriday(fridayFrom.getValue().toString() +"-"+ fridayTo.getValue().toString());
-            timetable.setId(doctor.getId());
-            timetableService.save(timetable);
-            Notification.show("Sikeres regisztráció!",2000,Notification.Position.MIDDLE);
-            UI.getCurrent().navigate(Login.class);
+            if(doctorTimetableIsValid()){
+                timetable.setMonday(mondayFrom.getValue().toString() +"-"+mondayTo.getValue().toString());
+                timetable.setTuesday(tuesdayFrom.getValue().toString() +"-"+ tuesdayTo.getValue().toString());
+                timetable.setWednesday(wednesdayFrom.getValue().toString()+"-"+wednesdayTo.getValue().toString());
+                timetable.setThursday(thursdayFrom.getValue().toString() +"-"+ thursdayTo.getValue().toString());
+                timetable.setFriday(fridayFrom.getValue().toString() +"-"+ fridayTo.getValue().toString());
+                doctorService.save(doctor);
+                timetable.setId(doctor.getId());
+                timetableService.save(timetable);
+                Notification.show("Sikeres regisztráció!",2000,Notification.Position.MIDDLE);
+                UI.getCurrent().navigate(Login.class);
+            }else{
+                Notification.show("Hibás adatok!",2000,Notification.Position.MIDDLE);
+            }
             });
 
         doctorFormLayout2.setColspan(title,4);
@@ -287,6 +293,16 @@ public class Registration extends VerticalLayout {
                 || firstNameD.isEmpty() || lastNameD.isEmpty() || emailD.isEmpty() || cityD.isEmpty()){
             return false;
         }else return true;
+    }
+
+    boolean doctorTimetableIsValid(){
+        if (mondayFrom.isEmpty() || mondayTo.isEmpty() || mondayFrom.getValue().isAfter(mondayTo.getValue()) || tuesdayFrom.isEmpty() || tuesdayTo.isEmpty()
+            || tuesdayFrom.getValue().isAfter(tuesdayTo.getValue()) || wednesdayFrom.isEmpty() || wednesdayTo.isEmpty() || wednesdayFrom.getValue().isAfter(wednesdayTo.getValue()) || thursdayFrom.isEmpty() || thursdayTo.isEmpty()
+            || thursdayFrom.getValue().isAfter(thursdayTo.getValue()) || fridayFrom.isEmpty() || fridayTo.isEmpty() || fridayFrom.getValue().isAfter(fridayTo.getValue())){
+            return false;
+        }else{
+            return true;
+        }
     }
 
     void setStyle(){

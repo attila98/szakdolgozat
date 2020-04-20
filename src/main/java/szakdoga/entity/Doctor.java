@@ -1,7 +1,6 @@
 package szakdoga.entity;
 
 
-
 import javax.persistence.*;
 
 @Entity

@@ -81,7 +81,7 @@ public class Login extends VerticalLayout {
 
         DoctorLoginForm.addLoginListener(loginEvent -> {
             doctor=doctorService.findByEmail(loginEvent.getUsername());
-            if (doctorService.findByEmail(loginEvent.getUsername()) != null && doctor.getPassword().equals(loginEvent.getPassword())){
+            if (doctorService.findByEmail(loginEvent.getUsername()) != null && passwordEncoder.matches(loginEvent.getPassword(),doctor.getPassword())){
                 Notification.show("Sikeres bejelentkezés!",2000,Notification.Position.MIDDLE);
                 wrappedSession.setAttribute(Names.DOCTOR,doctor.getEmail());
                 UI.getCurrent().navigate(DoctorHomeView.class);

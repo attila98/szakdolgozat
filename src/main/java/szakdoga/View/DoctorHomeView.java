@@ -5,6 +5,7 @@ import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.notification.Notification;
@@ -34,6 +35,7 @@ public class DoctorHomeView extends VerticalLayout {
     VaadinSession session = UI.getCurrent().getSession();
     WrappedSession wrappedSession;
     MenuBar menuBar = new MenuBar();
+    H3 noBook = new H3("Nincs megjeleníthető foglalás az ön számára.");
 
     Image img = new Image("header.png","banner");
 
@@ -83,18 +85,26 @@ public class DoctorHomeView extends VerticalLayout {
             setStyle();
             doctor=doctorService.findByEmail(wrappedSession.getAttribute(Names.DOCTOR).toString());
 
-            H2 title=new H2("Foglalalások");
 
+            H2 title=new H2("Foglalalások");
             appointmentList = appointmentService.getAll().stream().filter(app -> app.getDoctor_id()==doctor.getId()).collect(Collectors.toList());
+
             appointmentGrid.setItems(appointmentList);
             appointmentGrid.addColumn(Appointment::getFormattedDate).setHeader("Dátum");
             appointmentGrid.addColumn(Appointment::getStartapp).setHeader("Hány órától");
             appointmentGrid.addColumn(Appointment::getEndapp).setHeader("Meddig");
-            appointmentGrid.addColumn(Appointment::getPatient_id).setHeader("Orvos neve");
+            appointmentGrid.addColumn(Appointment::getPatientName).setHeader("Beteg neve");
+            appointmentGrid.addColumn(Appointment::getPatientTBNumber).setHeader("Beteg TB száma");
+            appointmentGrid.addColumn(Appointment::getPatientBDay).setHeader("Beteg születési dátuma");
             appointmentGrid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES,GridVariant.LUMO_NO_BORDER);
 
             verticalLayout.add(img, menuBar);
-            verticalLayout2.add(title,appointmentGrid);
+            if (appointmentList.isEmpty()){
+                verticalLayout2.add(title,noBook);
+            }else{
+                verticalLayout2.add(title,appointmentGrid);
+            }
+
             add(verticalLayout,verticalLayout2);
 
         } else {
@@ -125,5 +135,7 @@ public class DoctorHomeView extends VerticalLayout {
         img.getStyle().set("align-self","center");
         img.getStyle().set("border-radius","15px");
         img.getStyle().set("border","1px solid");
+
+        noBook.getStyle().set("margin-bottom","50px");
     }
 }
